@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Gemini</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<style>
+:root{--bg:#fff;--fg:#000;--mute:#6b6b6b;--line:#000;--soft:#f2f2f2}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:'Inter Tight',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-weight:500;font-size:18px;line-height:1.55;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 24px;flex-wrap:wrap}
+.logo{font-weight:800;font-size:24px;letter-spacing:-.04em}
+.bar{display:flex;gap:10px;align-items:center}
+.seg{display:flex;border:2px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{padding:6px 16px;font-weight:800;font-size:15px}
+.seg button[aria-pressed=true]{background:var(--fg);color:var(--bg)}
+.key{border:2px solid var(--line);border-radius:999px;padding:6px 16px;font-weight:800;font-size:15px}
+main{flex:1;overflow-y:auto;padding:0 24px}
+.wrap{max-width:760px;margin:0 auto;padding-bottom:32px}
+.hero{padding:12vh 0 0}
+.hero h1{font-weight:800;font-size:clamp(44px,11vw,104px);letter-spacing:-.05em;line-height:.92}
+.hero p{margin-top:20px;color:var(--mute);font-size:18px}
+.msg{margin-top:32px}
+.u{display:flex;justify-content:flex-end}
+.u div{background:var(--fg);color:var(--bg);font-weight:800;padding:10px 18px;border-radius:22px 22px 4px 22px;max-width:85%;white-space:pre-wrap;overflow-wrap:anywhere}
+.a .body{overflow-wrap:anywhere}
+.a .body>*+*{margin-top:1em}
+.a h1,.a h2,.a h3{font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.a h1{font-size:34px}.a h2{font-size:26px}.a h3{font-size:21px}
+.a strong{font-weight:800}
+.a ul,.a ol{padding-left:1.3em}.a li+li{margin-top:.35em}
+.a a{color:inherit;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:2px}
+.a blockquote{border-left:4px solid var(--fg);padding-left:16px;font-weight:800}
+.a hr{border:0;border-top:2px solid var(--fg)}
+.a code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88em;background:var(--soft);padding:2px 6px;border-radius:6px}
+.a pre{position:relative;background:var(--fg);color:var(--bg);border-radius:16px;padding:18px 18px 16px;overflow-x:auto;font-size:15px;line-height:1.5}
+.a pre code{background:none;padding:0;color:inherit}
+.cp{position:absolute;top:8px;right:10px;font-size:13px;font-weight:800;color:var(--bg);opacity:.7;background:#333;border-radius:999px;padding:3px 12px}
+.cp:hover{opacity:1}
+.a table{border-collapse:collapse;display:block;overflow-x:auto}
+.a th,.a td{border:2px solid var(--fg);padding:6px 12px;text-align:left}
+.a th{font-weight:800}
+.think{border:2px solid var(--fg);border-radius:16px;padding:10px 16px;margin-bottom:16px}
+.think summary{font-weight:800;cursor:pointer;font-size:15px}
+.think .tb{margin-top:8px;color:var(--mute);font-size:16px;white-space:pre-wrap}
+.caret::after{content:'';display:inline-block;width:.55em;height:1em;background:var(--fg);margin-left:3px;vertical-align:-.12em;animation:b 1s steps(2) infinite}
+@keyframes b{50%{opacity:0}}
+footer{padding:8px 24px calc(16px + env(safe-area-inset-bottom,0px))}
+.box{max-width:760px;margin:0 auto;display:flex;align-items:flex-end;gap:8px;border:2px solid var(--line);border-radius:28px;padding:8px 8px 8px 20px}
+textarea{flex:1;border:0;outline:0;resize:none;font:inherit;font-weight:800;background:none;color:inherit;max-height:200px;padding:8px 0;line-height:1.4}
+textarea::placeholder{color:var(--mute);font-weight:500}
+.go{width:44px;height:44px;flex:none;border-radius:50%;background:var(--fg);color:var(--bg);font-size:22px;font-weight:800;display:grid;place-items:center}
+.go:disabled{opacity:.25;cursor:default}
+dialog{border:2px solid var(--fg);border-radius:24px;padding:24px;max-width:420px;width:calc(100% - 32px);margin:auto;color:var(--fg);background:var(--bg)}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+dialog h2{font-weight:800;font-size:26px;letter-spacing:-.03em}
+dialog p{color:var(--mute);font-size:15px;margin:8px 0 16px}
+dialog input{width:100%;border:2px solid var(--fg);border-radius:14px;padding:12px 14px;font:inherit;font-weight:800;background:none;color:inherit}
+.row{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.row button{border:2px solid var(--fg);border-radius:999px;padding:8px 20px;font-weight:800}
+.row .pri{background:var(--fg);color:var(--bg)}
+@media(prefers-reduced-motion:reduce){.caret::after{animation:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Gemini</div>
+  <div class="bar">
+    <div class="seg" role="group" aria-label="Модель">
+      <button id="m1" aria-pressed="true">Быстрая</button>
+      <button id="m2" aria-pressed="false">Умная</button>
+    </div>
+    <button class="key" id="keyBtn">API-ключ</button>
+  </div>
+</header>
+
+<main id="main"><div class="wrap" id="log">
+  <div class="hero" id="hero">
+    <h1>Спроси что&nbsp;угодно.</h1>
+    <p>Быстрая отвечает сразу. Умная сначала думает, потом отвечает.</p>
+  </div>
+</div></main>
+
+<footer>
+  <div class="box">
+    <textarea id="inp" rows="1" placeholder="Напиши сообщение" aria-label="Сообщение"></textarea>
+    <button class="go" id="go" aria-label="Отправить">↑</button>
+  </div>
+</footer>
+
+<dialog id="dlg">
+  <h2>API-ключ Gemini</h2>
+  <p>Ключ хранится только в этом браузере (localStorage) и отправляется только в Google. Получить ключ: aistudio.google.com</p>
+  <input id="keyIn" type="password" placeholder="Вставь ключ" autocomplete="off">
+  <div class="row"><button id="keyCancel">Отмена</button><button class="pri" id="keySave">Сохранить</button></div>
+</dialog>
+
+<script>
+const $=id=>document.getElementById(id);
+const log=$('log'),main=$('main'),inp=$('inp'),go=$('go'),dlg=$('dlg');
+const store={get:k=>{try{return localStorage.getItem(k)||''}catch(e){return ''}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+const LITE='gemini-flash-lite-latest',SMART='gemini-flash-latest';
+const DEFAULT_KEY='AQ.Ab8RN6IExbWIN8LYGoK2tVFf14KIrUfqW-PzZ7KgllzjnMZC6Q';
+let key=store.get('gm_key')||DEFAULT_KEY,model=store.get('gm_model')||LITE,msgs=[],busy=false,ctrl=null;
+
+function setModel(m){model=m;store.set('gm_model',m);$('m1').setAttribute('aria-pressed',m===LITE);$('m2').setAttribute('aria-pressed',m===SMART)}
+$('m1').onclick=()=>setModel(LITE);
+$('m2').onclick=()=>setModel(SMART);
+setModel(model);
+
+$('keyBtn').onclick=()=>{$('keyIn').value=key;dlg.showModal()};
+$('keyCancel').onclick=()=>dlg.close();
+$('keySave').onclick=()=>{key=$('keyIn').value.trim();store.set('gm_key',key);dlg.close()};
+
+inp.addEventListener('input',()=>{inp.style.height='auto';inp.style.height=Math.min(inp.scrollHeight,200)+'px'});
+inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();submit()}});
+go.onclick=()=>busy?ctrl&&ctrl.abort():submit();
+
+log.addEventListener('click',e=>{
+  if(!e.target.classList.contains('cp'))return;
+  const pre=e.target.parentElement,t=pre.querySelector('code').innerText;
+  navigator.clipboard.writeText(t).then(()=>{e.target.textContent='Скопировано';setTimeout(()=>e.target.textContent='Копировать',1500)});
+});
+
+function nearBottom(){return main.scrollHeight-main.scrollTop-main.clientHeight<120}
+function scrollDown(){main.scrollTop=main.scrollHeight}
+
+function render(el,text,caret){
+  const html=DOMPurify.sanitize(marked.parse(text,{breaks:true,gfm:true}));
+  el.innerHTML=html;
+  el.querySelectorAll('pre').forEach(p=>p.insertAdjacentHTML('afterbegin','<button class="cp">Копировать</button>'));
+  el.classList.remove('caret');
+  if(caret){
+    const last=el.lastElementChild;
+    const tgt=last&&last.tagName!=='PRE'&&last.tagName!=='TABLE'?last:el;
+    tgt.classList.add('caret');
+  }
+}
+
+async function submit(){
+  const text=inp.value.trim();
+  if(!text||busy)return;
+  if(!key){$('keyBtn').click();return}
+  $('hero')&&$('hero').remove();
+  inp.value='';inp.style.height='auto';
+  msgs.push({role:'user',content:text});
+  const u=document.createElement('div');u.className='msg u';
+  const ub=document.createElement('div');ub.textContent=text;u.append(ub);log.append(u);
+
+  const a=document.createElement('div');a.className='msg a';
+  a.innerHTML='<details class="think" hidden open><summary>Размышления</summary><div class="tb"></div></details><div class="body"></div>';
+  log.append(a);scrollDown();
+  const think=a.querySelector('.think'),tb=a.querySelector('.tb'),body=a.querySelector('.body');
+  render(body,'',true);
+
+  busy=true;go.textContent='■';ctrl=new AbortController();
+  let rQ='',cQ='',rS=0,cS=0,done=false;
+
+  // «печатная машинка»: скорость растёт, если накопился хвост
+  function tick(){
+    const stick=nearBottom();
+    let ch=false;
+    if(rS<rQ.length){rS+=Math.max(2,Math.ceil((rQ.length-rS)/10));tb.textContent=rQ.slice(0,rS);ch=true}
+    else if(cS<cQ.length){cS+=Math.max(1,Math.ceil((cQ.length-cS)/14));render(body,cQ.slice(0,cS),true);ch=true}
+    if(ch&&stick)scrollDown();
+    if(done&&rS>=rQ.length&&cS>=cQ.length)return finish();
+    requestAnimationFrame(tick);
+  }
+  function finish(){
+    render(body,cQ,false);
+    if(rQ&&think)think.open=false;
+    busy=false;go.textContent='↑';
+    if(cQ)msgs.push({role:'assistant',content:cQ});else msgs.pop();
+  }
+  requestAnimationFrame(tick);
+
+  try{
+    const req={contents:msgs.map(m=>({role:m.role==='user'?'user':'model',parts:[{text:m.content}]}))};
+    if(model===SMART)req.generationConfig={thinkingConfig:{includeThoughts:true}};
+    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':streamGenerateContent?alt=sse',{
+      method:'POST',signal:ctrl.signal,
+      headers:{'Content-Type':'application/json','x-goog-api-key':key},
+      body:JSON.stringify(req)
+    });
+    if(!r.ok){
+      const m=r.status===400||r.status===403?'Ключ не подошёл или доступ закрыт. Проверь ключ в настройках.':r.status===429?'Лимит бесплатного тарифа исчерпан. Подожди немного.':'Ошибка '+r.status;
+      throw new Error(m);
+    }
+    const rd=r.body.getReader(),dec=new TextDecoder();let buf='';
+    while(true){
+      const {value,done:d}=await rd.read();if(d)break;
+      buf+=dec.decode(value,{stream:true});
+      const lines=buf.split('\n');buf=lines.pop();
+      for(const l of lines){
+        if(!l.startsWith('data:'))continue;
+        const p=l.slice(5).trim();if(!p||p==='[DONE]')continue;
+        try{
+          const parts=JSON.parse(p).candidates[0].content.parts||[];
+          for(const pt of parts){
+            if(!pt.text)continue;
+            if(pt.thought){think.hidden=false;rQ+=pt.text}else cQ+=pt.text;
+          }
+        }catch(e){}
+      }
+    }
+  }catch(e){
+    if(e.name!=='AbortError'){
+      cQ+=(cQ?'\n\n':'')+'**'+(e.message==='Failed to fetch'?'Нет соединения с Google. Проверь интернет.':e.message)+'**';
+    }
+  }
+  done=true;
+}
+</script>
+</body>
+</html>
